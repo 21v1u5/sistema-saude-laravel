@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class PacienteController extends Controller
 {
-    // Exibe a tela principal
+    // Tela Principal: Carrega as listas
     public function index()
     {
         $aguardando = Paciente::where('status', 'Aguardando')->orderBy('id')->get();
@@ -17,7 +17,7 @@ class PacienteController extends Controller
         return view('sistema.index', compact('aguardando', 'observacao', 'finalizados'));
     }
 
-    // Salva a Triagem (Passo 1)
+    // 1. TRIAGEM (Salvar novo)
     public function store(Request $request)
     {
         // Tratamento do "Não Identificado"
@@ -25,19 +25,16 @@ class PacienteController extends Controller
         
         $dados = $request->all();
         $dados['nao_identificado'] = $ni;
-        $dados['nome'] = $ni ? 'PACIENTE NÃO IDENTIFICADO' : mb_strtoupper($request->nome);
-        $dados['nome_social'] = $ni ? '' : $this->tratarCampo($request->nome_social);
-        
-        // Tratamento de campos compostos
-        $dados['queixa'] = ($request->queixa === 'outra') ? "Outra: " . $request->queixa_descricao : $request->queixa;
-        $dados['raca'] = ($request->raca === 'outros') ? "Outros: " . $request->raca_outros_descricao : $request->raca;
-        $dados['municipio'] = ($request->municipio === 'OUTRO') ? $request->municipio_outro : $request->municipio;
-        
-        // Aplica o tratarCampo para os demais
-        $camposTexto = ['mae', 'endereco', 'ocupacao', 'afericao', 'destino_detalhe', 'observacao_desfecho'];
-        foreach($camposTexto as $campo) {
-            if(isset($dados[$campo])) $dados[$campo] = $this->tratarCampo($dados[$campo]);
+        // Se for NI, forçamos o nome. Se não, o Model já converte pra maiúsculo.
+        if ($ni) {
+            $dados['nome'] = 'PACIENTE NÃO IDENTIFICADO';
+            $dados['nome_social'] = '';
         }
+
+        // Tratamento de Selects com opção "Outros"
+        if ($request->queixa === 'outra') $dados['queixa'] = "Outra: " . $request->queixa_descricao;
+        if ($request->raca === 'outros') $dados['raca'] = "Outros: " . $request->raca_outros_descricao;
+        if ($request->municipio === 'OUTRO') $dados['municipio'] = $request->municipio_outro;
 
         $dados['status'] = 'Aguardando';
         $dados['data_registro'] = now();
@@ -47,7 +44,7 @@ class PacienteController extends Controller
         return redirect()->route('sistema.index')->with('msg', '✅ Triagem salva! Paciente aguardando médico.');
     }
 
-    // Salva o Atendimento Médico (Passo 2)
+    // 2. ATENDIMENTO MÉDICO
     public function updateMedico(Request $request)
     {
         $paciente = Paciente::find($request->id_paciente);
@@ -56,70 +53,66 @@ class PacienteController extends Controller
             return back()->with('msg', '❌ ERRO: ID não encontrado!');
         }
 
-        // Lógica do Modal de Confirmação
+        // Lógica do Modal de Confirmação (Refeita para Laravel)
+        // Se já está finalizado ou em observação e NÃO confirmou ainda...
         if (($paciente->status === 'Finalizado' || $paciente->status === 'Em Observacao') && !$request->has('confirmacao_reabertura')) {
-            // Retorna para a view com os dados para abrir o modal
+            // Voltamos para a tela anterior enviando os dados para abrir o modal
             return back()->with('modal_confirmacao', [
                 'dados' => $request->all(),
                 'tipo' => $paciente->status === 'Finalizado' ? 'finalizado' : 'observacao'
             ]);
         }
 
-        $paciente->update([
-            'diagnostico' => mb_strtoupper($request->diagnostico),
-            'alergia' => $request->alergia,
-            'alergia_descricao' => $this->tratarCampo($request->alergia_descricao),
-            'doenca_notificacao' => $request->doenca_notificacao,
-            'doenca_descricao' => $this->tratarCampo($request->doenca_descricao),
-            'acidente_trabalho' => $request->acidente_trabalho,
-            'plano_terapeutico' => $this->tratarCampo($request->plano_terapeutico),
-            'status' => 'Em Observacao'
-        ]);
+        // Tratamento dos campos condicionais
+        $dados = $request->all();
+        if ($request->alergia === 'SIM') $dados['alergia_descricao'] = $request->alergia_descricao;
+        if ($request->doenca_notificacao === 'SIM') $dados['doenca_descricao'] = $request->doenca_descricao;
+        
+        $dados['status'] = 'Em Observacao';
+        
+        $paciente->update($dados);
 
         $msg = $request->has('confirmacao_reabertura') ? "🔄 Atendimento REFEITO com sucesso!" : "⚕️ Atendimento Realizado! Paciente em OBSERVAÇÃO.";
         return redirect()->route('sistema.index')->with('msg', $msg);
     }
 
-    // Salva a Finalização (Passo 3)
+    // 3. FINALIZAÇÃO
     public function updateFinal(Request $request)
     {
         $paciente = Paciente::find($request->id_paciente_fim);
 
         if (!$paciente) return back()->with('msg', '❌ ID inválido!');
         
+        // Validação: Só finaliza se tiver diagnóstico
         if (empty($paciente->diagnostico)) {
             return back()->with('msg', '⚠️ ATENÇÃO: Paciente ainda não passou pelo médico.');
         }
 
+        // Se o destino for "TRANSFERIDO PARA", pega o detalhe, senão pega o select
+        $dados = $request->all();
+        
         $paciente->update([
             'destino' => $request->destino,
-            'destino_detalhe' => $this->tratarCampo($request->destino_detalhe),
-            'observacao_desfecho' => $this->tratarCampo($request->observacao_desfecho),
+            'destino_detalhe' => $request->destino_detalhe,
+            'observacao_desfecho' => $request->observacao_desfecho,
             'status' => 'Finalizado'
         ]);
 
         return redirect()->route('sistema.index')->with('msg', '🏁 Paciente FINALIZADO com sucesso!');
     }
 
-    // Excluir
+    // EXCLUIR
     public function destroy($id)
     {
         Paciente::destroy($id);
         return redirect()->route('sistema.index')->with('msg', '🗑️ Registro excluído!');
     }
 
-    // Imprimir
+    // IMPRIMIR (Gera a view de impressão)
     public function imprimir($id)
     {
         $p = Paciente::findOrFail($id);
+        // Retorna uma view separada só para impressão
         return view('sistema.imprimir', compact('p'));
-    }
-
-    // Função Auxiliar Privada (Substitui a do arquivo antigo)
-    private function tratarCampo($valor)
-    {
-        $valor = trim($valor ?? '');
-        if ($valor === '') return 'NÃO IDENTIFICADO';
-        return mb_strtoupper($valor);
     }
 }

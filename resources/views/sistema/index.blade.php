@@ -5,7 +5,7 @@
     <title>SEMUS - Sistema de Atendimento</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        /* (MANTIVE SEU CSS ORIGINAL EXATAMENTE IGUAL PARA NÃO QUEBRAR O LAYOUT) */
+        /* SEU CSS ORIGINAL MANTIDO INTEGRALMENTE */
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #E5E9F2; margin: 0; padding: 0; color: #444; }
         header { background: #1351B4; color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 30px; }
         header img { height: 50px; background: white; padding: 5px; border-radius: 8px; margin-bottom: 10px; }
@@ -38,6 +38,7 @@
         .badge { padding: 5px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
         .badge-warning { background-color: #ffc107; color: #212529; }
         .badge-success { background-color: #28a745; color: white; }
+        
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: #fff; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; text-align: center; border-top: 5px solid #ffc107; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
@@ -50,37 +51,37 @@
 </head>
 <body>
 
-{{-- MODAL DE CONFIRMAÇÃO (LÓGICA BLADE) --}}
+{{-- MODAL DE CONFIRMAÇÃO (LÓGICA LARAVEL/BLADE) --}}
 @if(session('modal_confirmacao'))
-<div class="modal-overlay">
-    <div class="modal-content">
-        @php $modalData = session('modal_confirmacao'); @endphp
-        
-        @if ($modalData['tipo'] === 'finalizado')
-            <h3>⚠️ Paciente já Finalizado!</h3>
-            <p>Tem certeza que deseja que esse paciente volte para a observação?</p>
-        @else
-            <h3>⚠️ Atenção: Refazer Atendimento</h3>
-            <p>Este paciente já está em <strong>Observação</strong>. <br>Tem certeza que deseja refazer o Atendimento Médico?</p>
-        @endif
-        
-        <div class="modal-actions">
-            <form method="post" action="{{ route('pacientes.medico') }}" style="flex:1; margin:0;">
-                @csrf
-                @foreach ($modalData['dados'] as $chave => $valor)
-                    <input type="hidden" name="{{ $chave }}" value="{{ $valor }}">
-                @endforeach
-                <input type="hidden" name="confirmacao_reabertura" value="1">
-                <button type="submit" class="btn-sim">SIM, CONTINUAR</button>
-            </form>
-            <a href="{{ route('sistema.index') }}" class="btn-nao">NÃO</a>
+    @php $modal = session('modal_confirmacao'); @endphp
+    <div class="modal-overlay">
+        <div class="modal-content">
+            @if ($modal['tipo'] === 'finalizado')
+                <h3>⚠️ Paciente já Finalizado!</h3>
+                <p>Tem certeza que deseja que esse paciente volte para a observação?</p>
+            @else
+                <h3>⚠️ Atenção: Refazer Atendimento</h3>
+                <p>Este paciente já está em <strong>Observação</strong>. <br>Tem certeza que deseja refazer o Atendimento Médico?</p>
+            @endif
+            
+            <div class="modal-actions">
+                <form method="post" action="{{ route('pacientes.medico') }}" style="flex:1; margin:0;">
+                    @csrf
+                    {{-- Reenvia os dados originais --}}
+                    @foreach ($modal['dados'] as $chave => $valor)
+                        <input type="hidden" name="{{ $chave }}" value="{{ $valor }}">
+                    @endforeach
+                    <input type="hidden" name="confirmacao_reabertura" value="1">
+                    <button type="submit" class="btn-sim">SIM, CONTINUAR</button>
+                </form>
+                <a href="{{ route('sistema.index') }}" class="btn-nao">NÃO</a>
+            </div>
         </div>
     </div>
-</div>
 @endif
 
 <header>
-    {{-- OBS: Coloque a imagem na pasta public/ e use asset() --}}
+    {{-- Certifique-se que a imagem está em public/logo_sao_luis.png --}}
     <img src="{{ asset('logo_sao_luis.png') }}"><br>
     <strong>PREFEITURA DE SÃO LUÍS – MA</strong>
     Secretaria Municipal de Saúde – SEMUS
@@ -89,12 +90,12 @@
 <div class="main-container">
     
     @if(session('msg'))
-        <div class="msg" style="background: {{ str_contains(session('msg'), '❌') ? '#f8d7da' : '#d4edda' }}; color: {{ str_contains(session('msg'), '❌') ? '#721c24' : '#155724' }}">
+        <div class="msg" style="background: {{ str_contains(session('msg'), '✅') || str_contains(session('msg'), '⚕️') ? '#d4edda' : '#f8d7da' }}; color: {{ str_contains(session('msg'), '✅') || str_contains(session('msg'), '⚕️') ? '#155724' : '#721c24' }}">
             {{ session('msg') }}
         </div>
     @endif
 
-    {{-- FORMULÁRIO 1: TRIAGEM --}}
+    {{-- 1. TRIAGEM --}}
     <form method="post" action="{{ route('pacientes.store') }}" class="card">
         @csrf
         <h2>1. Identificação e Triagem</h2>
@@ -123,10 +124,38 @@
                 </select>
             </div>
         </div>
-        
-        {{-- ... MANTENHA O RESTO DOS CAMPOS DA TRIAGEM IGUAL ... --}}
-        {{-- Vou resumir aqui, mas você deve colar todo o HTML da triagem --}}
-        
+        <div class="grid">
+            <div><label>Escolaridade:</label>
+                <select name="escolaridade">
+                    <option value="" style="color:#888;">SELECIONE...</option>
+                    <option value="Ensino Fundamental">Ensino Fundamental</option>
+                    <option value="Médio">Ensino Médio</option>
+                    <option value="Superior">Ensino Superior</option>
+                    <option value="IGNORADO">IGNORADO</option>
+                </select>
+            </div>
+            <div><label>Raça/Cor:</label>
+                <select name="raca" id="raca-select">
+                    <option value="" style="color:#888;">SELECIONE...</option>
+                    <option value="Branco">Branco</option>
+                    <option value="Preto">Preto</option>
+                    <option value="Pardo">Pardo</option>
+                    <option value="Amarelo">Amarelo</option>
+                    <option value="Indígena">Indígena</option>
+                    <option value="outros">Outros</option>
+                </select>
+                <div id="box_raca_outros" class="hidden" style="margin-top:5px;"><input name="raca_outros_descricao" placeholder="Qual raça?"></div>
+            </div>
+        </div>
+        <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div><label>Ocupação:</label><input name="ocupacao" placeholder="Profissão"></div>
+            <div><label>UF:</label><input name="uf" value="MA" maxlength="2"></div>
+            <div><label>CEP:</label><input name="cep"></div>
+        </div>
+        <div class="grid">
+            <div style="flex: 2;"><label>Endereço:</label><input name="endereco"></div>
+            <div><label>Telefone:</label><input name="telefone"></div>
+        </div>
         <div class="grid">
             <div><label>Município:</label>
                 <select name="municipio" id="mun">
@@ -138,30 +167,50 @@
             </div>
             <div><label>Hora Entrada*:</label><input type="time" name="horario_entrada" required></div>
         </div>
-
+        
         <div style="margin-top: 15px;">
-            <label style="background: #e9ecef; padding: 8px; border-left: 4px solid #1351B4; margin-bottom: 10px;">AFERIÇÃO MÉDICA:</label>
-            <textarea name="afericao" rows="3" placeholder="PA, Temperatura, Peso..."></textarea>
+            <label style="background: #e9ecef; padding: 8px; border-left: 4px solid #1351B4; margin-bottom: 10px;">AFERIÇÃO MÉDICA (Sinais Vitais, PA, Temp, etc):</label>
+            <textarea name="afericao" rows="3" placeholder="Digite aqui a PA, Temperatura, Peso, Saturação..."></textarea>
         </div>
 
         <div class="grid" style="margin-top: 15px;">
             <div style="flex: 1;"><label>Queixa Principal*:</label>
                 <select id="queixa-principal" name="queixa" required>
                     <option value="" disabled selected style="color:#888;">SELECIONE...</option>
+                    <option value="intoxicacao_alcoolica">Intoxicação alcoólica</option>
+                    <option value="substancias_psicoativas">Uso de substâncias psicoativas</option>
+                    <option value="traumatismo">Traumatismo (queda, briga, etc)</option>
+                    <option value="ferimento_arma">Ferimento por arma</option>
+                    <option value="dificuldade_respiratoria">Dificuldade respiratória</option>
+                    <option value="mal_estar_desmaio">Mal-estar geral / desmaio</option>
+                    <option value="Lesão cortante ">Lesão cortante </option>
+                    <option value="pico hipertensivo">Pico hipertensivo</option>
+                    <option value="Crise de ansiedade">Crise de ansiedade</option>
+                    <option value="Síncope / Tontura">Síncope / Tontura</option>
                     <option value="Cefaléia">Cefaléia</option>
+                    <option value="Dor no estômago">Dor no estômago</option>
+                    <option value="Intoxicação alcoólica">Intoxicação alcoólica</option>
+                    <option value="Náuseas / Vômitos">Náuseas / Vômitos</option>
+                    <option value="Taquicardia">Taquicardia</option>
+                    <option value="Mal estar">Mal estar</option>
+                    <option value="Pico hipertensivo">Pico hipertensivo</option>
+                    <option value="Hipotensão">Hipotensão</option>
+                    <option value="Hiperglicemia">Hiperglicemia</option>
+                    <option value="Hipoglicemia">Hipoglicemia</option>
+                    <option value="Processo alérgico">Processo alérgico</option>
+                    <option value="Taquicardia">Taquicardia</option>
+                    <option value="Escorições">Escorições</option>
                     <option value="outra">Outra</option>
-                    {{-- Cole todas as opções do seu select original aqui --}}
                 </select>
             </div>
         </div>
         <div id="box_queixa_outra" class="hidden" style="margin-top:10px;">
             <label>Descrição da Queixa:</label><textarea name="queixa_descricao" id="input_queixa_outra" rows="2"></textarea>
         </div>
-
         <button type="submit" class="btn">REGISTRAR ENTRADA</button>
     </form>
 
-    {{-- LISTAGENS --}}
+    {{-- LISTAS --}}
     <div class="grid" style="grid-template-columns: 1fr 1fr;">
         <div class="card card-triagem">
             <h3>⏳ Aguardando Médico</h3>
@@ -180,7 +229,7 @@
         </div>
 
         <div class="card card-observacao">
-            <h3>⚠️ Em Observação</h3>
+            <h3>⚠️ Em Observação (Já Medicado)</h3>
             <table><tr><th>ID</th><th>Paciente</th><th>Status</th></tr>
                 @foreach($observacao as $p)
                 <tr>
@@ -193,28 +242,51 @@
         </div>
     </div>
 
-    {{-- FORMULÁRIO 2: ATENDIMENTO MÉDICO --}}
+    {{-- 2. ATENDIMENTO --}}
     <form method="post" action="{{ route('pacientes.medico') }}" class="card">
         @csrf
         <h2>2. Atendimento Médico (Diagnóstico)</h2>
+        
         <div class="grid" style="grid-template-columns: 0.5fr 3.5fr;">
             <div><label>ID Paciente*:</label><input type="number" name="id_paciente" required style="border: 2px solid #1351B4;"></div>
             <div><label>Diagnóstico Médico*:</label><textarea name="diagnostico" rows="1" required></textarea></div>
         </div>
+        <div class="grid">
+            <div><label>Alergias?</label><select name="alergia" id="ale">
+                <option value="" style="color:#888;">SELECIONE...</option>
+                <option value="NÃO">NÃO</option><option value="SIM">SIM</option>
+            </select>
+                <div id="b_ale" style="display:none; margin-top:5px;"><input name="alergia_descricao" placeholder="Quais?"></div>
+            </div>
+            <div><label>Notificação Compulsória?</label><select name="doenca_notificacao" id="not">
+                <option value="" style="color:#888;">SELECIONE...</option>
+                <option value="NÃO">NÃO</option><option value="SIM">SIM</option>
+            </select>
+                <div id="b_not" style="display:none; margin-top:5px;"><input name="doenca_descricao" placeholder="Qual doença?"></div>
+            </div>
+        </div>
         
-        {{-- ... Copie os selects de Alergia/Notificação do original ... --}}
-        
+        <div style="margin-top: 10px;">
+             <label>Acidente Trabalho?</label><select name="acidente_trabalho">
+                 <option value="" style="color:#888;">SELECIONE...</option>
+                 <option value="NÃO">NÃO</option><option value="SIM">SIM</option>
+             </select>
+        </div>
+
         <div style="margin-top: 20px;">
-            <label style="background: #e9ecef; padding: 8px; border-left: 4px solid #1351B4; display: block;">PLANO TERAPÊUTICO</label>
+            <label style="background: #e9ecef; padding: 8px; border-left: 4px solid #1351B4; display: block;">PLANO TERAPÊUTICO (Medicações e Conduta)</label>
             <textarea name="plano_terapeutico" rows="5" style="width:100%; margin-top:5px;"></textarea>
         </div>
+
         <button type="submit" class="btn">SALVAR E ENVIAR PARA OBSERVAÇÃO</button>
     </form>
 
-    {{-- FORMULÁRIO 3: FINALIZAÇÃO --}}
+    {{-- 3. FINALIZAÇÃO --}}
     <form method="post" action="{{ route('pacientes.final') }}" class="card">
         @csrf
-        <h2><i class="bi bi-door-open-fill"></i> 3. Finalização</h2>
+        <h2><i class="bi bi-door-open-fill"></i> 3. Finalização de Atendimento (Desfecho)</h2>
+        <p style="font-size:12px; color:#666; margin-bottom:10px;">* Só é possível finalizar se o paciente já tiver passado pelo passo 2 (Médico).</p>
+        
         <div class="grid" style="grid-template-columns: 0.5fr 3.5fr;">
             <div><label>ID Paciente*:</label><input type="number" name="id_paciente_fim" required style="border: 2px solid #1351B4;"></div>
             <div>
@@ -230,10 +302,12 @@
                 <div id="b_dest" style="display:none; margin-top:5px;"><input name="destino_detalhe" placeholder="Local de destino"></div>
             </div>
         </div>
+        
         <div style="margin-top:10px;">
             <label>Observação do Desfecho:</label>
-            <input name="observacao_desfecho">
+            <input name="observacao_desfecho" placeholder="Ex: Receita entregue, orientações dadas.">
         </div>
+
         <button type="submit" class="btn">FINALIZAR (DAR ALTA)</button>
     </form>
 
@@ -257,7 +331,6 @@
 
 </div>
 
-{{-- JAVASCRIPT: Mantido igual --}}
 <script>
     const setupToggle = (idS, idB, val) => {
         const s = document.getElementById(idS);
@@ -266,20 +339,19 @@
         });
     }
     setupToggle('mun', 'b_mun', 'OUTRO');
-    // Adicione os outros toggles aqui (raca, alergia, etc)
+    setupToggle('raca-select', 'box_raca_outros', 'outros');
+    setupToggle('ale', 'b_ale', 'SIM');
+    setupToggle('not', 'b_not', 'SIM');
     setupToggle('dest', 'b_dest', 'TRANSFERIDO PARA');
-    
     document.getElementById('queixa-principal').addEventListener('change', function() {
         document.getElementById('box_queixa_outra').style.display = (this.value === 'outra') ? 'block' : 'none';
     });
-    
     document.getElementById('fd').addEventListener('change', function() {
         const nasc = new Date(this.value); const hoje = new Date();
         let idade = hoje.getFullYear() - nasc.getFullYear();
         if (hoje.getMonth() < nasc.getMonth() || (hoje.getMonth() == nasc.getMonth() && hoje.getDate() < nasc.getDate())) idade--;
         document.getElementById('fi').value = idade >= 0 ? idade : 0;
     });
-    
     document.getElementById('ni').onchange = function() {
         ['fn', 'fs', 'fm', 'fc', 'fd', 'fi'].forEach(id => { 
             const element = document.getElementById(id);
