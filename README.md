@@ -47,4 +47,4 @@ php artisan migrate
 php artisan serve
 ```
 
-Acesse: https://www.google.com/search?q=http://127.0.0.1:8000
+Acesse: http://127.0.0.1:8000
