@@ -1,59 +1,101 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏥 Sistema de Gestão de Atendimento (SGA) - Versão Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![Laravel](https://img.shields.io/badge/Laravel-10%2B-red) ![PHP](https://img.shields.io/badge/PHP-8.2-blue) ![SQLite](https://img.shields.io/badge/Database-SQLite-lightgrey)
 
-## About Laravel
+Sistema web para triagem, atendimento médico e monitoramento de pacientes em tempo real. Desenvolvido para cenários de alta demanda (Hospitais de Campanha e Eventos), focado em agilidade e **zero dependência de infraestrutura complexa** (roda localmente com SQLite).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Funcionalidades
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Triagem e Recepção
+* **Cadastro Ágil:** Registro rápido de pacientes com padronização automática de dados.
+* **Modo "Não Identificado":** Fluxo específico para pacientes sem documentos (gera ID anônimo).
+* **Sinais Vitais:** Campo para registro de PA, Temperatura, Saturação, etc.
 
-## Learning Laravel
+### 2. Atendimento Médico (Consultório)
+* **Prontuário Simplificado:** Diagnóstico e Conduta Terapêutica.
+* **Alertas de Segurança:** Tags visuais para **Alergias** e **Notificação Compulsória**.
+* **Vigilância:** Registro de Acidentes de Trabalho.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 3. Gestão e Monitoramento (BI)
+* **Dashboard:** Gráficos em tempo real (Fluxo por dia, Sexo, Faixa Etária, Queixas Principais).
+* **Relatórios:** Geração de PDF (Ficha de Atendimento) e listagens auditáveis.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 📦 Como Instalar e Rodar (Passo a Passo)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Siga estes passos no seu terminal (PowerShell, CMD ou Git Bash):
 
-### Premium Partners
+### 1. Baixar e Instalar Dependências
+```bash
+# 1. Clone este repositório
+git clone [https://github.com/SEU-USUARIO/NOME-DO-REPO.git](https://github.com/SEU-USUARIO/NOME-DO-REPO.git)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 2. Entre na pasta
+cd NOME-DO-REPO
 
-## Contributing
+# 3. Instale as bibliotecas do Laravel
+composer install
+2. Configurar o Ambiente
+O Laravel precisa de um arquivo .env com as configurações locais.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
 
-## Code of Conduct
+# 1. Crie uma cópia do exemplo
+copy .env.example .env
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 2. Gere a chave de segurança
+php artisan key:generate
+3. Configurar o Banco de Dados (SQLite)
+Este projeto usa SQLite para facilitar a portabilidade (um arquivo único ao invés de um servidor MySQL).
 
-## Security Vulnerabilities
+Abra o arquivo .env e configure a conexão assim (apague as linhas DB_HOST, DB_PORT, etc.):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Snippet de código
+```bash
+DB_CONNECTION=sqlite
+Crie o arquivo do banco:
 
-## License
+Vá na pasta database do projeto.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Crie um arquivo vazio chamado database.sqlite.
+
+(Dica no Windows: Botão direito > Novo Documento de Texto > Renomeie para database.sqlite e apague o .txt do final).
+
+4. Criar as Tabelas e Imagens
+Rode a migração para criar a estrutura do banco:
+
+```bash
+
+php artisan migrate
+(Se perguntar "Would you like to create it?", digite yes).
+
+Imagens: Certifique-se de que os arquivos logo_sao_luis.png e rodape.png.png estejam dentro da pasta public/.
+
+▶️ Como Usar
+Com tudo configurado, inicie o servidor local:
+
+```bash
+
+php artisan serve
+Agora acesse no seu navegador: 👉 https://www.google.com/search?q=http://127.0.0.1:8000
+
+📂 Estrutura de Pastas Importantes
+app/Http/Controllers/: Onde fica a lógica (Paciente, Dashboard, Relatórios).
+
+app/Models/: Modelos de dados (Paciente.php).
+
+resources/views/: Onde ficam as telas (HTML/Blade).
+
+database/migrations/: Definição da estrutura do banco de dados.
+
+public/: Onde ficam as imagens e arquivos estáticos acessíveis.
+
+🧪 Rodando Testes
+Para garantir que o fluxo de triagem não quebre com alterações:
+
+Bash
+
+php artisan test
