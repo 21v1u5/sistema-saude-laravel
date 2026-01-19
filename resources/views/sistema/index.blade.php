@@ -85,6 +85,11 @@
     <img src="{{ asset('logo_sao_luis.png') }}"><br>
     <strong>PREFEITURA DE SÃO LUÍS – MA</strong>
     Secretaria Municipal de Saúde – SEMUS
+
+    <div style="margin-top: 15px;">
+        <a href="{{ route('dashboard') }}" class="btn" style="background: #e67e22; width: auto; display: inline-block; margin: 0 5px; text-decoration: none;">📊 Dashboard</a>
+        <a href="{{ route('relatorios.index') }}" class="btn" style="background: #27ae60; width: auto; display: inline-block; margin: 0 5px; text-decoration: none;">📄 Relatórios</a>
+    </div>
 </header>
 
 <div class="main-container">
