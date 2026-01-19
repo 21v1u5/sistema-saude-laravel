@@ -56,13 +56,13 @@ php artisan key:generate
 ### 3. Configurar o Banco de Dados (SQLite)
 Este projeto usa SQLite para facilitar a portabilidade (um arquivo único ao invés de um servidor MySQL).
 
-a. Abra o arquivo .env e configure a conexão assim (apague as linhas DB_HOST, DB_PORT, etc.):
+#### a. Abra o arquivo .env e configure a conexão assim (apague as linhas DB_HOST, DB_PORT, etc.):
 
 ```bash
 
 DB_CONNECTION=sqlite
 ```
-b. Crie o arquivo do banco:
+#### b. Crie o arquivo do banco:
 
 Vá na pasta database do projeto.
 
@@ -71,7 +71,7 @@ Crie um arquivo vazio chamado database.sqlite.
 (Dica no Windows: Botão direito > Novo Documento de Texto > Renomeie para database.sqlite e apague o .txt do final).
 
 ### 4. Criar as Tabelas e Imagens
-Rode a migração para criar a estrutura do banco:
+#### a. Rode a migração para criar a estrutura do banco:
 
 ```bash
 
@@ -81,7 +81,7 @@ php artisan migrate
 
 (Se perguntar "Would you like to create it?", digite yes).
 
-Imagens: Certifique-se de que os arquivos logo_sao_luis.png e rodape.png.png estejam dentro da pasta public/.
+#### b. Imagens: Certifique-se de que os arquivos logo_sao_luis.png e rodape.png.png estejam dentro da pasta public/.
 
 ### ▶️ Como Usar
 Com tudo configurado, inicie o servidor local:
