@@ -38,25 +38,31 @@ cd NOME-DO-REPO
 
 # 3. Instale as bibliotecas do Laravel
 composer install
-2. Configurar o Ambiente
+
+```
+### 2. Configurar o Ambiente
 O Laravel precisa de um arquivo .env com as configurações locais.
 
-Bash
+```bash
 
 # 1. Crie uma cópia do exemplo
 copy .env.example .env
 
 # 2. Gere a chave de segurança
 php artisan key:generate
-3. Configurar o Banco de Dados (SQLite)
+```
+
+
+### 3. Configurar o Banco de Dados (SQLite)
 Este projeto usa SQLite para facilitar a portabilidade (um arquivo único ao invés de um servidor MySQL).
 
-Abra o arquivo .env e configure a conexão assim (apague as linhas DB_HOST, DB_PORT, etc.):
+a. Abra o arquivo .env e configure a conexão assim (apague as linhas DB_HOST, DB_PORT, etc.):
 
-Snippet de código
+```bash
 
 DB_CONNECTION=sqlite
-Crie o arquivo do banco:
+```
+b. Crie o arquivo do banco:
 
 Vá na pasta database do projeto.
 
@@ -64,25 +70,29 @@ Crie um arquivo vazio chamado database.sqlite.
 
 (Dica no Windows: Botão direito > Novo Documento de Texto > Renomeie para database.sqlite e apague o .txt do final).
 
-4. Criar as Tabelas e Imagens
+### 4. Criar as Tabelas e Imagens
 Rode a migração para criar a estrutura do banco:
 
-Bash
+```bash
 
 php artisan migrate
+
+```
+
 (Se perguntar "Would you like to create it?", digite yes).
 
 Imagens: Certifique-se de que os arquivos logo_sao_luis.png e rodape.png.png estejam dentro da pasta public/.
 
-▶️ Como Usar
+### ▶️ Como Usar
 Com tudo configurado, inicie o servidor local:
 
-Bash
+```bash
 
 php artisan serve
+```
 Agora acesse no seu navegador: 👉 https://www.google.com/search?q=http://127.0.0.1:8000
 
-📂 Estrutura de Pastas Importantes
+### 📂 Estrutura de Pastas Importantes
 app/Http/Controllers/: Onde fica a lógica (Paciente, Dashboard, Relatórios).
 
 app/Models/: Modelos de dados (Paciente.php).
@@ -93,9 +103,10 @@ database/migrations/: Definição da estrutura do banco de dados.
 
 public/: Onde ficam as imagens e arquivos estáticos acessíveis.
 
-🧪 Rodando Testes
+### 🧪 Rodando Testes
 Para garantir que o fluxo de triagem não quebre com alterações:
 
-Bash
+```bash
 
 php artisan test
+```
