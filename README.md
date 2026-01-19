@@ -41,7 +41,7 @@ composer install
 2. Configurar o Ambiente
 O Laravel precisa de um arquivo .env com as configurações locais.
 
-```bash
+Bash
 
 # 1. Crie uma cópia do exemplo
 copy .env.example .env
@@ -54,7 +54,7 @@ Este projeto usa SQLite para facilitar a portabilidade (um arquivo único ao inv
 Abra o arquivo .env e configure a conexão assim (apague as linhas DB_HOST, DB_PORT, etc.):
 
 Snippet de código
-```bash
+
 DB_CONNECTION=sqlite
 Crie o arquivo do banco:
 
@@ -67,7 +67,7 @@ Crie um arquivo vazio chamado database.sqlite.
 4. Criar as Tabelas e Imagens
 Rode a migração para criar a estrutura do banco:
 
-```bash
+Bash
 
 php artisan migrate
 (Se perguntar "Would you like to create it?", digite yes).
@@ -77,7 +77,7 @@ Imagens: Certifique-se de que os arquivos logo_sao_luis.png e rodape.png.png est
 ▶️ Como Usar
 Com tudo configurado, inicie o servidor local:
 
-```bash
+Bash
 
 php artisan serve
 Agora acesse no seu navegador: 👉 https://www.google.com/search?q=http://127.0.0.1:8000
